@@ -1,0 +1,19 @@
+<resources>
+    <string name="live_title">Interactive Live Video Streaming</string>
+    <string name="live_mute">Mute</string>
+    <string name="live_unmute">Unmute</string>
+    <string name="live_video_item">Video Options</string>
+    <string name="live_audio_item">Audio Options</string>
+    <string name="live_operator">Operation</string>
+    <string name="live_user_back_camera">Use Rear Camera</string>
+    <string name="live_user_front_camera">Use Front Camera</string>
+    <string name="live_open_camera">Camera On</string>
+    <string name="live_close_camera">Camera Off</string>
+    <string name="live_close_mic">Mic off</string>
+    <string name="live_open_mic">Mic On</string>
+    <string name="rtc_type">"RTCType: "</string>
+    <string name="roomid">"RoomID: "</string>
+    <string name="create_time">"CreateTime: "</string>
+    <string name="room_type">"RoomType: "</string>
+    <string name="time_format_fail">TimeFormatFail</string>
+</resources>

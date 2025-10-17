@@ -1,0 +1,20 @@
+<resources>
+    <string name="live_title">RTC Switch Demo</string>
+    <string name="live_mute">静音</string>
+    <string name="live_unmute">取消静音</string>
+    <string name="live_video_item">视频选项</string>
+    <string name="live_audio_item">音频选项</string>
+    <string name="live_operator">操作</string>
+    <string name="live_user_back_camera">使用后置摄像头</string>
+    <string name="live_user_front_camera">使用前置摄像头</string>
+    <string name="live_open_camera">打开摄像头</string>
+    <string name="live_close_camera">关闭摄像头</string>
+    <string name="live_close_mic">关闭麦克风</string>
+    <string name="live_open_mic">打开麦克风</string>
+    <string name="roomid">"房间ID: "</string>
+    <string name="create_time">"创建时间: "</string>
+    <string name="room_type">"房间类型: "</string>
+    <string name="rtc_type">"RTC类型: "</string>
+    <string name="time_format_fail">时间格式错误</string>
+
+</resources>
