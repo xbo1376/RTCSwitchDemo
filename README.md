@@ -55,7 +55,7 @@ Ensure you have installed:
 
 The project uses the following server address (can be modified in `NetworkManager.java`):
 ```java
-private static final String BASE_URL = "http://175.27.215.206:8376";
+private static final String BASE_URL = "http://127.0.0.1:8376";
 ```
 
 ### 4. Compile and Run
