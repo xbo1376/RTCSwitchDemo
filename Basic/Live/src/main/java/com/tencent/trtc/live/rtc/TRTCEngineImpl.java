@@ -17,12 +17,12 @@ public class TRTCEngineImpl extends BaseRTCEngine {
 
     public TRTCEngineImpl(Context context) {
         mTRTCCloud = TRTCCloud.sharedInstance(context.getApplicationContext());
+        init();
     }
 
     @Override
-    public RTCEngine create() {
+    public void init() {
         mTRTCCloud.setListener(new TRTCCloudImplListener());
-        return null;
     }
 
     @Override

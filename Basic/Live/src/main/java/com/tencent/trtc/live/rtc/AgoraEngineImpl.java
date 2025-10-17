@@ -11,8 +11,7 @@ public class AgoraEngineImpl extends BaseRTCEngine {
     }
 
     @Override
-    public RTCEngine create() {
-        return null;
+    public void init() {
     }
 
     @Override

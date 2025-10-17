@@ -44,7 +44,6 @@ public class RoomListActivity extends TRTCBaseActivity {
         networkManager.getRoomList(new NetworkManager.GetRoomListCallback() {
             @Override
             public void onSuccess(final List<NetworkManager.RoomInfo> roomList) {
-                Log.e("xbo", "onSuccess: roomList = " + roomList.toString() );
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -116,6 +115,7 @@ public class RoomListActivity extends TRTCBaseActivity {
         // 显示加载状态
         Snackbar.make(findViewById(android.R.id.content), "Creating room...", Snackbar.LENGTH_INDEFINITE).show();
 
+        // 请求创建房间，从服务端获取房间信息
         NetworkManager.getInstance().createRoom(userId, "Live", new NetworkManager.CreateRoomCallback() {
 
             @Override
@@ -124,12 +124,14 @@ public class RoomListActivity extends TRTCBaseActivity {
                     @Override
                     public void run() {
                         Snackbar.make(findViewById(android.R.id.content), "Room created successfully: " + roomInfo.roomId, Snackbar.LENGTH_LONG).show();
-                        Log.d(TAG, "Room created successfully: " + roomInfo.toString());
 
                         new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
                             @Override
                             public void run() {
-                                RoomListActivity.this.startActivity(new Intent(RoomListActivity.this, LiveAnchorActivity.class).putExtra("roomInfo", roomInfo));
+
+                                Intent intent = new Intent(RoomListActivity.this, LiveAnchorActivity.class);
+                                intent.putExtra("roomInfo", roomInfo);
+                                RoomListActivity.this.startActivity(intent);
                             }
                         } , 1000);
 

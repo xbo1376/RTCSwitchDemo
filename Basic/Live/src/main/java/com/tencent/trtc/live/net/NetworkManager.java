@@ -191,9 +191,7 @@ public class NetworkManager {
         });
     }
     
-    /**
-     * 房间信息类
-     */
+
     public static class RoomInfo implements Serializable {
         public String roomId;
         public String ownerUserId;

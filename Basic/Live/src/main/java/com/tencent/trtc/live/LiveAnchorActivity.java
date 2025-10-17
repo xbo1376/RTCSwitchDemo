@@ -63,6 +63,7 @@ public class LiveAnchorActivity extends TRTCBaseActivity implements View.OnClick
             mRoomInfo = (NetworkManager.RoomInfo) intent.getSerializableExtra("roomInfo");
             Log.d(TAG, "roomInfo: " + mRoomInfo.toString());
 
+            // 根据 roomInfo 中的 rtcType 来选择 RTC 引擎线路
             RoomParams.EngineType engineType = RoomParams.EngineType.valueOf(mRoomInfo.rtcType);
             engine = RTCEngineFactory.getEngine(engineType, this);
             engine.setRtcListener(new RTCListenerImpl());
