@@ -116,13 +116,22 @@ public class LiveAudienceActivity extends TRTCBaseActivity implements View.OnCli
         if (engine == null)  return;
 
         String userId = SPUtils.getInstance(this).getString("userId", "");
+        Log.e(TAG, "enterRoom: userId " + userId);
 
         RoomParams roomParams = new RoomParams();
-        roomParams.appId = GenerateTestUserSig.SDKAPPID + "";
         roomParams.roomId = mRoomInfo.roomId;
         roomParams.userId = userId;
         roomParams.role = RoomParams.Role.Audience;
-        roomParams.token = GenerateTestUserSig.genTestUserSig(userId);
+
+        // 根据引擎设置不同引擎的 token，这里只是测试使用，正式上线需要服务端下发对应引擎的 appid 和 token
+        if (EngineType.Agora.getValue().equals(mRoomInfo.rtcType)) {
+            roomParams.appId = Config.AGORA_APPID;
+            roomParams.roomId = Config.CHANNEL_ID;
+            roomParams.token = Config.AGORA_TOKEN;
+        } else if (EngineType.TRTC.getValue().equals(mRoomInfo.rtcType)) {
+            roomParams.appId = Config.TENCENT_SDKAPPID;
+            roomParams.token = GenerateTestUserSig.genTestUserSig(Integer.parseInt(Config.TENCENT_SDKAPPID), Config.TENCENT_SECRETKEY, userId);
+        }
 
         Log.e(TAG, "enterRoom: roomParams " + roomParams.toString());
 

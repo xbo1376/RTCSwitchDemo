@@ -14,9 +14,7 @@ public class RTCEngineFactory {
             case TRTC:
                 return new TRTCEngineImpl(context);
             case Agora:
-                return new AgoraEngineImpl(context) {
-
-                };
+                return new AgoraEngineImpl(context);
         }
         return new TRTCEngineImpl(context);
     }

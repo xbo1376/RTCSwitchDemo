@@ -18,9 +18,6 @@ import javax.crypto.spec.SecretKeySpec;
 
 public class GenerateTestUserSig {
 
-    public static final int SDKAPPID = 0;
-
-    public static final String SECRETKEY = "";
 
     /**
      *  7 x 24 x 60 x 60 = 604800 = 7 days
@@ -29,8 +26,8 @@ public class GenerateTestUserSig {
      */
     private static final int EXPIRETIME = 604800;
 
-    public static String genTestUserSig(String userId) {
-        return genTLSSignature(SDKAPPID, userId, EXPIRETIME, null, SECRETKEY);
+    public static String genTestUserSig(int sdkappid, String secretkey,  String userId) {
+        return genTLSSignature(sdkappid, userId, EXPIRETIME, null, secretkey);
     }
 
     private static String genTLSSignature(long sdkAppId, String userId, long expire, byte[] userBuf, String priKeyContent) {

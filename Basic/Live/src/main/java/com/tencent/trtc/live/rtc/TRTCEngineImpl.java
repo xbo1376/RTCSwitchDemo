@@ -13,7 +13,7 @@ public class TRTCEngineImpl extends BaseRTCEngine {
     private static final String TAG = "TRTCEngineImpl";
 
     private TRTCCloud mTRTCCloud;
-    private RoomParams.Quality quality;
+    private RoomParams.Quality mQuality = RoomParams.Quality.Medium;;
 
     public TRTCEngineImpl(Context context) {
         mTRTCCloud = TRTCCloud.sharedInstance(context.getApplicationContext());
@@ -77,9 +77,7 @@ public class TRTCEngineImpl extends BaseRTCEngine {
 
     @Override
     public void setAudioQuality(RoomParams.Quality quality) {
-        if (mTRTCCloud == null) return;
-
-        this.quality = quality;
+        this.mQuality = quality;
     }
 
     @Override
@@ -89,7 +87,7 @@ public class TRTCEngineImpl extends BaseRTCEngine {
 
         TRTCCloudDef.TRTCVideoEncParam trtcVideoEncParam = new TRTCCloudDef.TRTCVideoEncParam();
         trtcVideoEncParam.videoBitrate = param.videoBitrate;
-        trtcVideoEncParam.videoFps = param.videoBitrate;
+        trtcVideoEncParam.videoFps = param.videoFps;
 
         int videoResolution = TRTCCloudDef.TRTC_VIDEO_RESOLUTION_1280_720;
 
@@ -119,7 +117,7 @@ public class TRTCEngineImpl extends BaseRTCEngine {
 
         int trtc_quality = TRTCCloudDef.TRTC_AUDIO_QUALITY_DEFAULT;
 
-        switch (quality){
+        switch (mQuality){
             case Low:
                 trtc_quality = TRTCCloudDef.TRTC_AUDIO_QUALITY_SPEECH;
                 break;
