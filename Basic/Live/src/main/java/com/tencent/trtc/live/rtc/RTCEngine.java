@@ -19,6 +19,7 @@ public interface RTCEngine {
     abstract void muteRemoteAudio(String userId, boolean mute);
     abstract void muteRemoteVideo(String userId, boolean mute);
     abstract void switchCamera(boolean isFrontCamera);
+    abstract String getRTCType();
 
     public static interface RTCListener {
         void onEnterRoom(long result);

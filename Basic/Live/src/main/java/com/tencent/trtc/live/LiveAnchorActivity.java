@@ -10,6 +10,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.basic.TRTCBaseActivity;
 import com.tencent.trtc.debug.GenerateTestUserSig;
@@ -67,6 +68,9 @@ public class LiveAnchorActivity extends TRTCBaseActivity implements View.OnClick
             RoomParams.EngineType engineType = RoomParams.EngineType.valueOf(mRoomInfo.rtcType);
             engine = RTCEngineFactory.getEngine(engineType, this);
             engine.setRtcListener(new RTCListenerImpl());
+
+            Log.d(TAG, "initData: engineType=" + engine.getRTCType());
+            Toast.makeText(this, "rtc_type:" + engine.getRTCType(), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -79,7 +83,7 @@ public class LiveAnchorActivity extends TRTCBaseActivity implements View.OnClick
         btn_switch_camera = findViewById(R.id.btn_switch_camera);
 
         String roomId = mRoomInfo.roomId;
-        tv_roomid.setText("RoomId: " + roomId);
+        tv_roomid.setText("RoomId: " + roomId + " " + engine.getRTCType());
 
         mRemoteUidList = new ArrayList<>();
         mRemoteViewList = new ArrayList<>();
@@ -191,26 +195,28 @@ public class LiveAnchorActivity extends TRTCBaseActivity implements View.OnClick
 
         @Override
         public void onEnterRoom(long result) {
-
+            Log.e(TAG, "onEnterRoom: result：" + result);
         }
 
         @Override
         public void onExitRoom(int reason) {
-
+            Log.e(TAG, "onExitRoom: reason：" + reason);
         }
 
         @Override
         public void onRemoteUserEnterRoom(String userId) {
-
+            Log.e(TAG, "onRemoteUserEnterRoom: userId：" + userId);
         }
 
         @Override
         public void onRemoteUserLeaveRoom(String userId, int reason) {
-
+            Log.e(TAG, "onRemoteUserLeaveRoom: userId：" + userId + " reason：" + reason);
         }
 
         @Override
         public void onUserVideoAvailable(String remoteUserid, boolean available) {
+            Log.e(TAG, "onUserVideoAvailable: remoteUserid：" + remoteUserid + " available：" + available);
+
             int index = mRemoteUidList.indexOf(remoteUserid);
 
             String userId = SPUtils.getInstance(LiveAnchorActivity.this).getString("userId", "");
@@ -231,7 +237,7 @@ public class LiveAnchorActivity extends TRTCBaseActivity implements View.OnClick
 
         @Override
         public void onUserAudioAvailable(String userId, boolean available) {
-
+            Log.e(TAG, "onUserAudioAvailable: userId：" + userId + " available：" + available);
         }
 
         private void refreshRemoteVideoViews() {
@@ -292,7 +298,7 @@ public class LiveAnchorActivity extends TRTCBaseActivity implements View.OnClick
 
     @Override
     protected void onDestroy() {
-        engine.exitRoom();
+        engine.destroy();
         super.onDestroy();
     }
 

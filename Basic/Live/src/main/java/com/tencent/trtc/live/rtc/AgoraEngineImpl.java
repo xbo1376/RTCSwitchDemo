@@ -1,23 +1,25 @@
 package com.tencent.trtc.live.rtc;
 
+import static io.agora.rtc2.Constants.AUDIO_SCENARIO_DEFAULT;
+
 import android.content.Context;
 import android.util.Log;
 import android.view.SurfaceView;
 
 import com.tencent.trtc.live.Config;
 
-
-import io.agora.rtc2.ChannelMediaOptions;
 import io.agora.rtc2.Constants;
 import io.agora.rtc2.IRtcEngineEventHandler;
 import io.agora.rtc2.RtcEngine;
 import io.agora.rtc2.RtcEngineConfig;
 import io.agora.rtc2.video.VideoCanvas;
 import io.agora.rtc2.video.VideoEncoderConfiguration;
+import io.agora.rte.VideoMirrorMode;
+import io.agora.rte.VideoRenderMode;
+
 
 public class AgoraEngineImpl extends BaseRTCEngine {
     private static final String TAG = "AgoraEngineImpl";
-
 
     private RtcEngine mRtcEngine;
     private RoomParams.Quality mQuality = RoomParams.Quality.Medium;
@@ -33,6 +35,14 @@ public class AgoraEngineImpl extends BaseRTCEngine {
         try {
             // 创建并初始化 RtcEngine
             mRtcEngine = RtcEngine.create(config);
+            // 打开日志调试
+            mRtcEngine.setParameters("{\"parameters\":{\"rtc.debug.enable\": true}}");
+            // 设置日志级别
+            mRtcEngine.setLogFilter(Constants.LOG_FILTER_DEBUG);
+            // 获取应用内部缓存目录 (Context.getCacheDir())
+            String internalCacheDir = context.getCacheDir().getAbsolutePath();
+            mRtcEngine.setLogFile(internalCacheDir + "/agora_log.txt"); // 设置日志文件路径
+            mRtcEngine.setLogFileSize(2048); // 设置日志文件大小(KB)
         } catch (Exception e) {
             Log.e(TAG, "AgoraEngineImpl: failed to create RtcEngine", e);
             e.printStackTrace();
@@ -42,41 +52,28 @@ public class AgoraEngineImpl extends BaseRTCEngine {
 
     @Override
     public void init() {
+        if (mRtcEngine == null) return;
 
-
+        // 启用视频模块（总开关）
+        mRtcEngine.enableVideo();
+        // 启用音频模块（总开关）
+        mRtcEngine.enableAudio();
     }
 
     @Override
     public void destroy() {
         if (mRtcEngine == null) return;
 
-        // 停止本地视频预览
-        mRtcEngine.stopPreview();
-        // 离开频道
-        mRtcEngine.leaveChannel();
+        exitRoom();
+        mRtcEngine.removeHandler(mRtcEventHandler);
         mRtcEngine = null;
         // 销毁引擎
         RtcEngine.destroy();
-
     }
 
     @Override
     public void enterRoom(RoomParams roomParams, RoomParams.RoomScene scene) {
-
-        // 创建 ChannelMediaOptions 对象，并进行配置
-        ChannelMediaOptions options = new ChannelMediaOptions();
-        // 设置用户角色为 BROADCASTER (主播) 或 AUDIENCE (观众)
-        options.clientRoleType = roomParams.role == RoomParams.Role.Anchor ? Constants.CLIENT_ROLE_BROADCASTER : Constants.CLIENT_ROLE_AUDIENCE;
-        // 设置频道场景为 BROADCASTING (直播场景)
-        options.channelProfile = Constants.CHANNEL_PROFILE_LIVE_BROADCASTING;
-        // 发布麦克风采集的音频
-        options.publishMicrophoneTrack = true;
-        // 发布摄像头采集的视频
-        options.publishCameraTrack = true;
-        // 自动订阅所有音频流
-        options.autoSubscribeAudio = true;
-        // 自动订阅所有视频流
-        options.autoSubscribeVideo = true;
+        if (mRtcEngine == null) return;
 
         int quality = Constants.AudioProfile.getValue(Constants.AudioProfile.MUSIC_STANDARD);
 
@@ -93,25 +90,28 @@ public class AgoraEngineImpl extends BaseRTCEngine {
         }
         // 设置音频质量
         Log.e(TAG, "enterRoom: mRtcEngine = " + mRtcEngine);
-        mRtcEngine.setAudioProfile(quality);
-
+        mRtcEngine.setAudioProfile(quality, AUDIO_SCENARIO_DEFAULT);
+        // 设置频道场景为 BROADCASTING (直播场景)
+        mRtcEngine.setChannelProfile(Constants.CHANNEL_PROFILE_LIVE_BROADCASTING);
+        // 设置用户角色为 BROADCASTER (主播) 或 AUDIENCE (观众)
+        mRtcEngine.setClientRole(roomParams.role == RoomParams.Role.Anchor ? Constants.CLIENT_ROLE_BROADCASTER : Constants.CLIENT_ROLE_AUDIENCE);
         // 使用临时 Token 和频道名加入频道，uid 为 0 表示引擎内部随机生成用户名
         // 成功后会触发 onJoinChannelSuccess 回调
-        mRtcEngine.joinChannel(roomParams.token, roomParams.roomId, Integer.parseInt(roomParams.userId), options);
+        mRtcEngine.joinChannel(roomParams.token, roomParams.roomId, null, Integer.parseInt(roomParams.userId));
     }
 
     @Override
     public void exitRoom() {
-
         if (mRtcEngine == null) return;
 
+        // 关闭音视频采集
         mRtcEngine.disableAudio();
+        mRtcEngine.disableVideo();
+
         // 停止本地视频预览
         mRtcEngine.stopPreview();
-        mRtcEngine.disableVideo();
         // 离开频道
         mRtcEngine.leaveChannel();
-
     }
 
     @Override
@@ -136,7 +136,7 @@ public class AgoraEngineImpl extends BaseRTCEngine {
                 dimensions = VideoEncoderConfiguration.VD_1280x720;
                 break;
             case VideoEncoderParam.VIDEO_RESOLUTION_1920_1080:
-                dimensions = VideoEncoderConfiguration.VD_1920x1080;
+                dimensions = new VideoEncoderConfiguration.VideoDimensions(1920, 1080);
                 break;
         }
 
@@ -150,11 +150,21 @@ public class AgoraEngineImpl extends BaseRTCEngine {
 
     @Override
     public void startLocalVideo(boolean frontCamera, SurfaceView surfaceView) {
-        // 启用视频模块
-        mRtcEngine.enableVideo();
-        // 将 SurfaceView 对象传入声网实时互动 SDK，设置本地视图
-        mRtcEngine.setupLocalVideo(new VideoCanvas(surfaceView, VideoCanvas.RENDER_MODE_FIT, 0));
+        if (mRtcEngine == null) return;
+
+        // 设置视频采集状态
+        mRtcEngine.enableLocalVideo(true);
+
+        // 设置本地渲染视图
+        VideoCanvas videoCanvas = new VideoCanvas(surfaceView);
+
+        mRtcEngine.setLocalRenderMode(
+                VideoRenderMode.VIDEO_RENDER_MODE_FIT,  // 渲染模式
+                VideoMirrorMode.VIDEO_MIRROR_MODE_AUTO  // 镜像模式
+        );
+
         // 开启本地预览
+        mRtcEngine.setupLocalVideo(videoCanvas);
         mRtcEngine.startPreview();
     }
 
@@ -162,8 +172,12 @@ public class AgoraEngineImpl extends BaseRTCEngine {
     public void stopLocalVideo() {
         if (mRtcEngine == null) return;
 
+        // 设置视频采集状态
+        mRtcEngine.enableLocalVideo(false);
+
         // 停止本地视频预览
         mRtcEngine.stopPreview();
+        mRtcEngine.disableVideo();
     }
 
     @Override
@@ -171,7 +185,7 @@ public class AgoraEngineImpl extends BaseRTCEngine {
         if (mRtcEngine == null) return;
 
         // 发布本地音频
-        mRtcEngine.enableAudio();
+        mRtcEngine.enableLocalAudio(true);
     }
 
     @Override
@@ -179,13 +193,17 @@ public class AgoraEngineImpl extends BaseRTCEngine {
         if (mRtcEngine == null) return;
 
         // 停止发布本地音频
-        mRtcEngine.disableAudio();
+        mRtcEngine.enableLocalAudio(false);
     }
 
     @Override
     public void startRemoteVideo(String userId, SurfaceView surfaceView) {
-        surfaceView.setZOrderMediaOverlay(true);
-        // 将 SurfaceView 对象传入声网实时互动 SDK，设置远端视图
+        if (mRtcEngine == null) return;
+
+        if (surfaceView != null) {
+            surfaceView.setZOrderMediaOverlay(true);
+        }
+
         mRtcEngine.setupRemoteVideo(new VideoCanvas(surfaceView, VideoCanvas.RENDER_MODE_FIT, Integer.parseInt(userId)));
     }
 
@@ -215,7 +233,6 @@ public class AgoraEngineImpl extends BaseRTCEngine {
 
     @Override
     public void switchCamera(boolean isFrontCamera) {
-
         if (mRtcEngine == null) return;
 
         if (isFrontCamera != this.isFrontCamera) {
@@ -223,6 +240,11 @@ public class AgoraEngineImpl extends BaseRTCEngine {
             this.isFrontCamera = !isFrontCamera;
         }
 
+    }
+
+    @Override
+    public String getRTCType() {
+        return RoomParams.EngineType.Agora.getValue();
     }
 
     private final IRtcEngineEventHandler mRtcEventHandler = new IRtcEngineEventHandler() {
@@ -279,7 +301,6 @@ public class AgoraEngineImpl extends BaseRTCEngine {
             if (rtcListener != null) {
                 rtcListener.onRemoteUserLeaveRoom(uid + "", reason);
             }
-
         }
     };
 

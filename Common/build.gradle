@@ -33,7 +33,7 @@ dependencies {
     api 'com.tencent.liteav:LiteAVSDK_Professional:12.8.0.19279'
 
     // Agora
-    api 'cn.shengwang.rtc:lite-sdk:4.6.0'
+    api 'io.agora.rtc:full-sdk:4.6.0'
 
     api project(':Debug')
     

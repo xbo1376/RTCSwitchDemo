@@ -55,6 +55,8 @@ public class LiveAudienceActivity extends TRTCBaseActivity implements View.OnCli
 
             EngineType engineType = EngineType.valueOf(mRoomInfo.rtcType);
             engine = RTCEngineFactory.getEngine(engineType, this);
+
+            Log.d(TAG, "initData: engineType=" + engine.getRTCType());
         }
     }
 
@@ -65,7 +67,7 @@ public class LiveAudienceActivity extends TRTCBaseActivity implements View.OnCli
         surfase_view = findViewById(R.id.surfase_view);
 
         String roomId = mRoomInfo.roomId;
-        tv_roomid.setText("RoomId: " + roomId);
+        tv_roomid.setText("RoomId: " + roomId + " " + engine.getRTCType());
         iv_back.setOnClickListener(this);
         btn_mute_remote_audio.setOnClickListener(this);
 
@@ -74,27 +76,27 @@ public class LiveAudienceActivity extends TRTCBaseActivity implements View.OnCli
 
             @Override
             public void onEnterRoom(long result) {
-
+                Log.d(TAG, "onEnterRoom: result：" + result);
             }
 
             @Override
             public void onExitRoom(int reason) {
-
+                Log.d(TAG, "onExitRoom: reason：" + reason);
             }
 
             @Override
             public void onRemoteUserEnterRoom(String userId) {
-
+                Log.d(TAG, "onRemoteUserEnterRoom: userId：" + userId);
             }
 
             @Override
             public void onRemoteUserLeaveRoom(String userId, int reason) {
-
+                Log.d(TAG, "onRemoteUserLeaveRoom: userId：" + userId + " reason：" + reason);
             }
 
             @Override
             public void onUserVideoAvailable(String userId, boolean available) {
-                Log.d(TAG, "onUserVideoAvailable  available " + available + " userId " + userId);
+                Log.d(TAG, "onUserVideoAvailable  userId：" + userId + " available：" + available);
                 if (available) {
                     mRemoteUserId = userId;
                     engine.startRemoteVideo(mRemoteUserId, surfase_view);
@@ -106,7 +108,7 @@ public class LiveAudienceActivity extends TRTCBaseActivity implements View.OnCli
 
             @Override
             public void onUserAudioAvailable(String userId, boolean available) {
-
+                Log.d(TAG, "onUserAudioAvailable  userId：" + userId + " available：" + available);
             }
         });
 
@@ -171,8 +173,8 @@ public class LiveAudienceActivity extends TRTCBaseActivity implements View.OnCli
 
     @Override
     protected void onDestroy() {
+        engine.destroy();
         super.onDestroy();
-        engine.exitRoom();
     }
 
 }

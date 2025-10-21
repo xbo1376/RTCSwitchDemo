@@ -22,6 +22,8 @@ public class TRTCEngineImpl extends BaseRTCEngine {
 
     @Override
     public void init() {
+        if (mTRTCCloud == null) return;
+
         mTRTCCloud.setListener(new TRTCCloudImplListener());
     }
 
@@ -29,6 +31,7 @@ public class TRTCEngineImpl extends BaseRTCEngine {
     public void destroy() {
         if (mTRTCCloud == null) return;
 
+        exitRoom();
         mTRTCCloud.setListener(null);
         mTRTCCloud = null;
 
@@ -37,7 +40,6 @@ public class TRTCEngineImpl extends BaseRTCEngine {
 
     @Override
     public void enterRoom(RoomParams roomParams , RoomParams.RoomScene scene) {
-
         if (mTRTCCloud == null) return;
 
         TRTCCloudDef.TRTCParams trtcParams = new TRTCCloudDef.TRTCParams();
@@ -82,8 +84,7 @@ public class TRTCEngineImpl extends BaseRTCEngine {
 
     @Override
     public void setVideoEncoderParam(VideoEncoderParam param) {
-        if (mTRTCCloud == null) return;
-        if (param == null) return;
+        if (mTRTCCloud == null || param == null) return;
 
         TRTCCloudDef.TRTCVideoEncParam trtcVideoEncParam = new TRTCCloudDef.TRTCVideoEncParam();
         trtcVideoEncParam.videoBitrate = param.videoBitrate;
@@ -173,6 +174,10 @@ public class TRTCEngineImpl extends BaseRTCEngine {
         mTRTCCloud.getDeviceManager().switchCamera(isFrontCamera);
     }
 
+    @Override
+    public String getRTCType() {
+        return RoomParams.EngineType.TRTC.getValue();
+    }
 
     class TRTCCloudImplListener extends TRTCCloudListener {
 
@@ -229,8 +234,6 @@ public class TRTCEngineImpl extends BaseRTCEngine {
                 rtcListener.onRemoteUserLeaveRoom(userId, reason);
             }
         }
-
     }
-
 
 }
