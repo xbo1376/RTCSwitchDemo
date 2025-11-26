@@ -11,4 +11,7 @@ public class Config {
     public static final String CHANNEL_ID = "test";
     public static final String AGORA_TOKEN = "test";
 
+    // 服务器地址
+    public static final String SERVER_ADDRESS = "http://127.0.0.1:8376";
+
 }

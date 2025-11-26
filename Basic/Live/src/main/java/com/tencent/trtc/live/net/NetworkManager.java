@@ -3,6 +3,8 @@ package com.tencent.trtc.live.net;
 
 import android.util.Log;
 
+import com.tencent.trtc.live.Config;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -33,7 +35,7 @@ public class NetworkManager {
     private OkHttpClient client;
     
     // Server address - please modify according to actual situation
-    private static final String BASE_URL = "http://175.27.215.206:8376";
+    private static final String BASE_URL = Config.SERVER_ADDRESS;
     
     public NetworkManager() {
         client = new OkHttpClient.Builder()
