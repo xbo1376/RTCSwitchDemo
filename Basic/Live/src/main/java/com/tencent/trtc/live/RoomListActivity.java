@@ -12,6 +12,7 @@ import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.example.basic.TRTCBaseActivity;
 import com.google.android.material.snackbar.Snackbar;
@@ -24,6 +25,7 @@ import java.util.List;
 public class RoomListActivity extends TRTCBaseActivity {
 
     private RecyclerView recycler_view;
+    private SwipeRefreshLayout swipe_refresh_layout;
     private RoomAdapter adapter;
     private String TAG = "RoomListActivity";
 
@@ -40,6 +42,13 @@ public class RoomListActivity extends TRTCBaseActivity {
     }
 
     private void initData() {
+        loadRoomList();
+    }
+
+    /**
+     * 加载房间列表数据
+     */
+    private void loadRoomList() {
         NetworkManager networkManager = NetworkManager.getInstance();
         networkManager.getRoomList(new NetworkManager.GetRoomListCallback() {
             @Override
@@ -48,17 +57,33 @@ public class RoomListActivity extends TRTCBaseActivity {
                     @Override
                     public void run() {
                         adapter.updateData(roomList);
+                        // 停止刷新动画
+                        if (swipe_refresh_layout != null) {
+                            swipe_refresh_layout.setRefreshing(false);
+                        }
                     }
                 });
             }
 
             @Override
-            public void onFailure(String errorMessage) {
+            public void onFailure(final String errorMessage) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        // 停止刷新动画
+                        if (swipe_refresh_layout != null) {
+                            swipe_refresh_layout.setRefreshing(false);
+                        }
+                        Toast.makeText(RoomListActivity.this, "Failed to load room list: " + errorMessage, Toast.LENGTH_SHORT).show();
+                        Log.e(TAG, "Failed to load room list: " + errorMessage);
+                    }
+                });
             }
         });
     }
 
     private void initView() {
+        swipe_refresh_layout = findViewById(R.id.swipe_refresh_layout);
         recycler_view = findViewById(R.id.recycler_view);
         recycler_view.setLayoutManager(new LinearLayoutManager(this));
         // 添加分割线
@@ -76,6 +101,15 @@ public class RoomListActivity extends TRTCBaseActivity {
         });
         recycler_view.setAdapter(adapter);
 
+        // 设置下拉刷新监听器
+        swipe_refresh_layout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                // 下拉刷新时重新加载数据
+                loadRoomList();
+            }
+        });
+
         // 创建房间
         findViewById(R.id.btn_create).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -90,7 +124,7 @@ public class RoomListActivity extends TRTCBaseActivity {
     @Override
     protected void onPermissionGranted() {
         initView();
-        initData();
+        loadRoomList();
     }
 
 
